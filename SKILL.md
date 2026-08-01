@@ -1,7 +1,7 @@
 ---
 name: github-release-management
 description: "Standardized GitHub release workflow: audit, cleanup, full-repo doc sync, commit, tag, push, gh release, verify. Trigger on: release, publish version, bump version, tag, deploy new version. Enforces anti-bloat constraints and verification gates at every phase."
-version: 1.1.0
+version: 1.2.0
 ---
 
 # GitHub Release Management

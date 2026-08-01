@@ -19,6 +19,7 @@
 - **四方同步校验**：代码 ↔ 中英文 README ↔ Release Notes ↔ CHANGELOG/packages 必须内容一致
 - **版本确认权归你**：AI 只建议，绝不自动执行版本升级
 - **流程控制**：热修复（≤3 提交）走快速路径；功能发布走完整 7 阶段
+- **自反膨胀**：≥260 行触发压缩，每 5 个 minor 版本退役审计，新教训嫁接现有规则而非追加
 
 ### 使用方式
 
@@ -33,7 +34,7 @@
 
 ### 约束
 
-- SKILL.md ≤ 280 行（当前 245 行）
+- SKILL.md ≤ 280 行（当前 249 行）
 - 9 条硬约束，不可协商
 - 每次发布必须通过 Phase 7 验证
 - 遵循 Google 工程规范 + spec 工作流（先规划后执行）
@@ -59,6 +60,7 @@ This skill locks the release process into a 7-phase gated pipeline. Any gate fai
 - **Four-way sync check**: code ↔ CN/EN README ↔ Release Notes ↔ CHANGELOG/packages must be consistent
 - **Version confirmation is yours**: AI recommends, never auto-executes version bumps
 - **Flow control**: hotfix (≤3 commits) takes fast path; feature release takes full 7 phases
+- **Self-anti-bloat**: compression trigger at ≥260 lines, retirement audit every 5 minor versions, new lessons graft onto existing rules
 
 ### Usage
 
@@ -73,7 +75,7 @@ Audit → Cleanup → Full Repo Doc Sync → Version Decision (user-confirmed)
 
 ### Constraints
 
-- SKILL.md ≤ 280 lines (current: 245)
+- SKILL.md ≤ 280 lines (current: 249)
 - 9 hard constraints, non-negotiable
 - Every release must pass Phase 7 verification
 - Follows Google engineering standards + spec workflow (plan before execute)

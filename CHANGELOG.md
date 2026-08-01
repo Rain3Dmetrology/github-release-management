@@ -3,6 +3,23 @@
 All notable changes to this skill are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/) + [SemVer](https://semver.org/).
 
+## [1.2.0] - 2026-08-02
+
+### Added
+- Phase 3b: README single-file CN/EN anchor switching with mandated writing order (user value → product/tech → history/acknowledgments)
+- Phase 3c: four-way consistency check (code ↔ README ↔ Release Notes ↔ CHANGELOG/packages)
+- Hard Constraint #9: Google engineering standards + spec workflow (plan before execute)
+- Constraint Maintenance section: compression trigger (≥260 lines), retirement audit (every 5 minor versions), anti-accumulation rule
+
+### Changed
+- README.md merged from two files (README + README_CN) into single CN/EN switchable file
+- Hard Constraint #5: rewritten from "no acknowledgments" to "enforced writing order"
+- Anti-Bloat #7: line budget now applies to combined README (≤200 lines)
+- SKILL.md line count: 233 → 249
+
+### Removed
+- README_CN.md (merged into README.md)
+
 ## [1.1.0] - 2026-08-02
 
 ### Added
