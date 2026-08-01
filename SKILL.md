@@ -219,6 +219,12 @@ During Phase 3h, enforce ALL:
 10. **Commented-out code**: blocks of >3 commented lines in changed files -> delete (use git history, not comments).
 11. **Empty catch/except**: bare `except:` or `catch {}` with no logging in changed files -> add logging or re-raise.
 
+## Constraint Maintenance (anti-bloat for this skill itself)
+
+- **Compression trigger**: when SKILL.md >= 260 lines, MUST merge/compress existing rules before adding any new content. Prefer consolidating 2-3 related rules into 1 rule with sub-items over appending.
+- **Retirement audit**: every 5 minor versions (or at compression trigger), review each constraint: (a) Is it now automated by CI? (b) Does it overlap another rule? (c) Does a real incident still justify it? If all three answers are "no" -> delete or merge.
+- **Never grow by accumulation**: new lessons learned must replace/extend an existing rule, not append a new standalone entry, unless genuinely orthogonal.
+
 ## Pitfalls
 
 - `cd /d` does not work in QoderWork Bash -> use `dir_path` parameter instead.
