@@ -12,7 +12,8 @@ Audit -> Cleanup -> Full Repo Doc Sync -> Version Decision (user-confirmed) -> C
 
 ## Constraints
 
-- SKILL.md <= 250 lines
+- SKILL.md <= 280 lines
 - Anti-bloat rules enforced on every release
+- Privacy & local-state scan (blocking gate: client names, hardcoded paths, personal emails)
 - Verification gates at every phase
 - Version number requires explicit user confirmation

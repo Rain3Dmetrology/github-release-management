@@ -1,7 +1,7 @@
 ---
 name: github-release-management
 description: "Standardized GitHub release workflow: audit, cleanup, full-repo doc sync, commit, tag, push, gh release, verify. Trigger on: release, publish version, bump version, tag, deploy new version. Enforces anti-bloat constraints and verification gates at every phase."
-version: 1.0.0
+version: 1.1.0
 ---
 
 # GitHub Release Management
@@ -32,10 +32,10 @@ After Phase 1 audit, classify the release:
 git status --porcelain
 git log --oneline $(git describe --tags --abbrev=0 2>nul || echo "HEAD~20")..HEAD
 git tag --sort=-v:refname | head -5
-git log origin/HEAD..HEAD --oneline
+git fetch origin && git rev-list --left-right --count origin/HEAD...HEAD
 ```
 
-Determine: unpushed commit count, latest tag, working tree state, CI status.
+Determine: unpushed commit count, latest tag, working tree state, CI status, local↔remote divergence.
 
 **GATE 1:** Working tree must be clean (or user approves stash). CI must be green (or user acknowledges). If gate fails, STOP and report.
 
@@ -109,20 +109,27 @@ Confirm LICENSE file exists. Verify year and entity are correct. Default: BSL 1.
 
 Apply ALL of the following (see Anti-Bloat Rules section below).
 
-### 3i. Pre-release quality scan
+### 3i. Pre-release quality & privacy scan
 
 ```bash
+# Code quality
 grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.py" --include="*.js" --include="*.ts" . | grep -v ".git/" | grep -v "test"
 grep -rn "print(\|console\.log" --include="*.py" --include="*.js" . | grep -v ".git/" | grep -v "test" | grep -v "__main__"
-grep -rn "password\|api_key\|secret\|token" --include="*.py" --include="*.env" --include="*.yml" . | grep -v ".git/" | grep -v "example"
+# Secrets
+grep -rn "password\|api_key\|secret\|token" --include="*.py" --include="*.env" --include="*.yml" . | grep -v ".git/" | grep -v "example" | grep -v ":-"
+# Privacy: hardcoded local paths (allow C:\Program Files for standard SDKs)
+grep -rn --include="*.py" --include="*.yaml" --include="*.yml" -E "[A-Z]:\\\\" . | grep -v ".git/" | grep -v "Program Files" | grep -v "local_data_paths"
+# Privacy: personal identifiers (emails, client/project names in non-doc files)
+grep -rn --include="*.py" -E "@(gmail|qq|163|outlook)\.com" . | grep -v ".git/"
 ```
 
-Flag results with severity:
-- **blocking**: hardcoded secrets or credentials in tracked files -> STOP release immediately.
-- **important**: TODO/FIXME in changed files, debug print statements -> report to user, user decides.
+Severity classification:
+- **blocking**: hardcoded secrets, credentials, client/customer names, user-specific disk paths (E:\, D:\project) in tracked files -> STOP release. Fix before proceeding.
+- **important**: TODO/FIXME in changed files, debug prints, personal emails -> report to user, user decides.
 - **nit**: TODO in unchanged files -> note but do not block.
 
-Verify .gitignore covers: `.env`, `*.key`, `credentials*`, `*secret*`.
+Verify .gitignore covers: `.env`, `*.key`, `credentials*`, `*secret*`, `local_*_paths*`, `*.local.*`.
+If CI exists, confirm it has a privacy/path lint step. If missing, flag as **important**.
 
 **GATE 3:** `git diff --stat` shows only expected files changed. No accidental deletions. No blocking-severity findings unresolved.
 
@@ -140,7 +147,8 @@ Present recommendation with justification. **DO NOT proceed until user explicitl
 ## Phase 5: COMMIT + TAG
 
 ```bash
-git add -A
+git status --porcelain          # review what will be staged
+git add <specific files>        # stage explicitly, never blind -A
 git commit -m "release: vX.Y.Z"
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 ```
@@ -210,14 +218,16 @@ During Phase 3h, enforce ALL:
 - Run `git push` and `git push --tags` separately (--follow-tags unreliable on some environments).
 - Exclude `.git/`, `node_modules/`, `__pycache__/`, `.venv/` from all grep operations.
 - Never execute tag/push/release before user confirms version in Phase 4.
+- If privacy leak discovered AFTER push: `git filter-repo --replace-text rules.txt --force` then force-push. Requires user confirmation (destructive).
 - `memory replace` operations require exact text match -> always `memory_get` first.
 
 ## Hard Constraints (non-negotiable)
 
 1. Version number requires explicit user confirmation. AI must never auto-decide and execute.
-2. This SKILL.md must never exceed 250 lines.
+2. This SKILL.md must never exceed 280 lines.
 3. Every release must pass Phase 7 verification. If any gate fails, report failure clearly.
 4. Never add "methodology", "design rationale", or "update history appendix" sections to any repo file.
 5. README describes WHAT + HOW ONLY. No design philosophy, no changelog, no acknowledgments bloat.
 6. Each phase gate is a hard stop. Do not skip gates even if user says "just push it".
 7. Gates have three outcomes: PASS / PASS_WITH_WARNINGS / BLOCK. BLOCK = hard stop (secrets, CI red, user denied). PASS_WITH_WARNINGS = report issue list, user chooses continue or fix. PASS = clean.
+8. Privacy scan (3i) is a BLOCK-level gate. Client names, user-specific paths, personal emails in tracked files = hard stop, no exceptions.
