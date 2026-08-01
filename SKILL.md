@@ -59,17 +59,26 @@ grep -rn "version" --include="*.py" --include="*.toml" --include="*.cfg" --inclu
 
 Update all version references to the new version (after Phase 4 confirms the number).
 
-### 3b. README Chinese
+### 3b. README (single file, CN/EN switchable)
 
-- Compare each section against actual code/features.
-- DELETE descriptions of removed/nonexistent features.
-- ADD descriptions for new features since last release.
-- Keep total <= 300 lines. If over, trim ruthlessly.
+Structure mandate: ONE README.md with `[English](#english) | [中文](#中文)` anchors at top.
 
-### 3c. README English
+Writing order (both languages, same structure):
+1. **User value first**: what problem it solves, framed from user psychology (loss aversion > gain; desire quality + simplicity + value simultaneously).
+2. **Product & technical**: capabilities, usage, workflow, constraints.
+3. **History & future**: version highlights in descending order, roadmap, acknowledgments/dependencies.
 
-- Align paragraph-by-paragraph with Chinese README.
-- Same content, same structure, same line budget.
+Sync rule: compare every claim against actual code. DELETE nonexistent features. ADD new ones. CN and EN must be paragraph-aligned.
+
+### 3c. Four-way consistency check
+
+After all doc edits, verify these four surfaces agree:
+- Code (actual features/behavior)
+- README (CN + EN sections)
+- Release Notes (gh release body)
+- CHANGELOG.md + packages metadata (version, deps)
+
+Any inconsistency = fix before proceeding to Phase 4.
 
 ### 3d. CHANGELOG.md
 
@@ -204,7 +213,7 @@ During Phase 3h, enforce ALL:
 4. **CHANGELOG verbosity**: any entry > 1 line -> truncate.
 5. **Stale comments**: comment contradicts current logic in changed files -> fix or delete.
 6. **Empty files**: .md with only TODO or blank -> delete.
-7. **Line budget**: README CN <= 300 lines, README EN <= 300 lines. Over budget -> trim.
+7. **Line budget**: README.md (CN+EN combined) <= 200 lines. Over budget -> trim.
 8. **No philosophy**: README states WHAT/HOW only. Never WHY-we-designed-it-this-way. No "architecture philosophy" sections.
 9. **No history appendix**: version history belongs in CHANGELOG.md only, never embedded in README or SKILL files.
 10. **Commented-out code**: blocks of >3 commented lines in changed files -> delete (use git history, not comments).
@@ -227,7 +236,8 @@ During Phase 3h, enforce ALL:
 2. This SKILL.md must never exceed 280 lines.
 3. Every release must pass Phase 7 verification. If any gate fails, report failure clearly.
 4. Never add "methodology", "design rationale", or "update history appendix" sections to any repo file.
-5. README describes WHAT + HOW ONLY. No design philosophy, no changelog, no acknowledgments bloat.
+5. README follows mandated writing order: user value first → product/tech → history desc + acknowledgments last. No design philosophy sections. No embedded changelog (use CHANGELOG.md).
 6. Each phase gate is a hard stop. Do not skip gates even if user says "just push it".
 7. Gates have three outcomes: PASS / PASS_WITH_WARNINGS / BLOCK. BLOCK = hard stop (secrets, CI red, user denied). PASS_WITH_WARNINGS = report issue list, user chooses continue or fix. PASS = clean.
 8. Privacy scan (3i) is a BLOCK-level gate. Client names, user-specific paths, personal emails in tracked files = hard stop, no exceptions.
+9. Repo structure and CI must follow Google engineering standards. Workflow: spec first, execute second. Low coupling, minimal redundancy, templated architecture.
