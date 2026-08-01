@@ -109,7 +109,22 @@ Confirm LICENSE file exists. Verify year and entity are correct. Default: BSL 1.
 
 Apply ALL of the following (see Anti-Bloat Rules section below).
 
-**GATE 3:** `git diff --stat` shows only expected files changed. No accidental deletions of functional code.
+### 3i. Pre-release quality scan
+
+```bash
+grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.py" --include="*.js" --include="*.ts" . | grep -v ".git/" | grep -v "test"
+grep -rn "print(\|console\.log" --include="*.py" --include="*.js" . | grep -v ".git/" | grep -v "test" | grep -v "__main__"
+grep -rn "password\|api_key\|secret\|token" --include="*.py" --include="*.env" --include="*.yml" . | grep -v ".git/" | grep -v "example"
+```
+
+Flag results with severity:
+- **blocking**: hardcoded secrets or credentials in tracked files -> STOP release immediately.
+- **important**: TODO/FIXME in changed files, debug print statements -> report to user, user decides.
+- **nit**: TODO in unchanged files -> note but do not block.
+
+Verify .gitignore covers: `.env`, `*.key`, `credentials*`, `*secret*`.
+
+**GATE 3:** `git diff --stat` shows only expected files changed. No accidental deletions. No blocking-severity findings unresolved.
 
 ## Phase 4: VERSION DECISION
 
@@ -184,6 +199,8 @@ During Phase 3h, enforce ALL:
 7. **Line budget**: README CN <= 300 lines, README EN <= 300 lines. Over budget -> trim.
 8. **No philosophy**: README states WHAT/HOW only. Never WHY-we-designed-it-this-way. No "architecture philosophy" sections.
 9. **No history appendix**: version history belongs in CHANGELOG.md only, never embedded in README or SKILL files.
+10. **Commented-out code**: blocks of >3 commented lines in changed files -> delete (use git history, not comments).
+11. **Empty catch/except**: bare `except:` or `catch {}` with no logging in changed files -> add logging or re-raise.
 
 ## Pitfalls
 
@@ -203,3 +220,4 @@ During Phase 3h, enforce ALL:
 4. Never add "methodology", "design rationale", or "update history appendix" sections to any repo file.
 5. README describes WHAT + HOW ONLY. No design philosophy, no changelog, no acknowledgments bloat.
 6. Each phase gate is a hard stop. Do not skip gates even if user says "just push it".
+7. Gates have three outcomes: PASS / PASS_WITH_WARNINGS / BLOCK. BLOCK = hard stop (secrets, CI red, user denied). PASS_WITH_WARNINGS = report issue list, user chooses continue or fix. PASS = clean.
